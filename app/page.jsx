@@ -1,5 +1,5 @@
-import OcpHorizonView from './ocpvs/OcpHorizonView';
+import MinXView from './ocpvs/MinXView';
 
 export default function Page() {
-  return <OcpHorizonView />;
+  return <MinXView />;
 }

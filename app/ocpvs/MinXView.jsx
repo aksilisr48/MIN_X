@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import markup from './markup';
 import originalScript from './original-script';
 
-export default function OcpHorizonView() {
+export default function MinXView() {
   const scriptRef = useRef(null);
   const [mode, setMode] = useState('signin');
   const [authenticated, setAuthenticated] = useState(false);
