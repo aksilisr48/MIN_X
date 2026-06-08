@@ -18,6 +18,16 @@ export default function MinXView() {
 
     const previousUpdateSim = window.updateSim;
     const previousLoadScenario = window.loadScenario;
+    const previousToggleSidebar = window.toggleSidebar;
+
+    window.toggleSidebar = function toggleSidebarFallback() {
+      document.body.classList.toggle('sidebar-hidden');
+      const hidden = document.body.classList.contains('sidebar-hidden');
+      document.querySelectorAll('.sidebar-toggle, .sidebar-reveal').forEach((btn) => {
+        btn.classList.toggle('active', hidden);
+        btn.setAttribute('aria-pressed', hidden ? 'true' : 'false');
+      });
+    };
 
     window.updateSim = function updateSimFallback() {
       const delayInput = document.getElementById('sim-delay');
@@ -28,10 +38,10 @@ export default function MinXView() {
       if (!delayInput || !resInput || !budInput || !projectInput) return;
 
       const simData = {
-        p4: { base: 'Avr 2026', months: ['Mai', 'Juin', 'Juil', 'Aout', 'Sep'] },
-        laverie: { base: 'Juin 2026', months: ['Juil', 'Aout', 'Sep'] },
-        slurry: { base: 'Dec 2026', months: ['Fev 2027', 'Mar 2027'] },
-        solaire: { base: 'Sep 2026', months: ['Oct', 'Nov', 'Dec 2026'] },
+        p4: { base: 'Avr 2026', months: ['Mai', 'Juin', 'Juil', 'Août', 'Sep'] },
+        laverie: { base: 'Juin 2026', months: ['Juil', 'Août', 'Sep'] },
+        slurry: { base: 'Déc 2026', months: ['Fév 2027', 'Mar 2027'] },
+        solaire: { base: 'Sep 2026', months: ['Oct', 'Nov', 'Déc 2026'] },
       };
 
       const delay = Number(delayInput.value);
@@ -65,21 +75,21 @@ export default function MinXView() {
         reco.style.borderColor = 'rgba(229,62,62,0.25)';
         reco.style.color = '#FC8181';
         reco.textContent =
-          "Situation critique : declencher une revue d'urgence avec le comite de direction. Chemin critique fortement impacte.";
+          "Situation critique : déclencher une revue d'urgence avec le comité de direction. Chemin critique fortement impacté.";
       } else if (riskScore >= 40) {
-        tag.innerHTML = '<span class="tag risk"><span class="tag-dot"></span>Risque Modere</span>';
+        tag.innerHTML = '<span class="tag risk"><span class="tag-dot"></span>Risque Modéré</span>';
         reco.style.background = 'rgba(240,165,0,0.07)';
         reco.style.borderColor = 'rgba(240,165,0,0.2)';
         reco.style.color = 'var(--gold)';
         reco.textContent =
-          'Recommandation : reaffecter des ressources et reviser les jalons critiques. Surveiller les indicateurs hebdomadairement.';
+          'Recommandation : réaffecter des ressources et réviser les jalons critiques. Surveiller les indicateurs hebdomadairement.';
       } else {
         tag.innerHTML = '<span class="tag on"><span class="tag-dot"></span>Risque Faible</span>';
         reco.style.background = 'rgba(0,132,61,0.07)';
         reco.style.borderColor = 'rgba(0,132,61,0.2)';
         reco.style.color = 'var(--g-l)';
         reco.textContent =
-          'Scenario acceptable. Les impacts sont maitrisables sans action immediate. Monitoring standard suffisant.';
+          'Scénario acceptable. Les impacts sont maîtrisables sans action immédiate. Monitoring standard suffisant.';
       }
     };
 
@@ -112,6 +122,7 @@ export default function MinXView() {
       scriptRef.current = null;
       window.updateSim = previousUpdateSim;
       window.loadScenario = previousLoadScenario;
+      window.toggleSidebar = previousToggleSidebar;
     };
   }, [authenticated]);
 
@@ -172,124 +183,160 @@ export default function MinXView() {
           </nav>
         </header>
 
-        <div className="auth-art auth-art-left" aria-hidden="true">
-          <div className="auth-squiggle" />
-          <div className="auth-note">
-            <span />
-            <span />
-          </div>
-          <div className="auth-tower">
-            <i />
-            <i />
-            <i />
-            <i />
-            <i />
-            <i />
-            <i />
-            <i />
-            <i />
-          </div>
-          <div className="auth-chart">
-            <span />
-          </div>
-        </div>
+        <div className="auth-panel-wrap">
+          {!isSignup ? (
+            <form className="auth-form auth-form-plain" onSubmit={submitAuth} key={mode}>
+              <h3>Welcome Back</h3>
+              <p>Enter your credentials to access your account.</p>
 
-        <form className="auth-card" onSubmit={submitAuth} key={mode}>
-          <div className="auth-kicker">OCP Horizon Simulation</div>
-          <h1>{isSignup ? 'Create Access' : 'Agent Login'}</h1>
-          <p>
-            {isSignup
-              ? 'Register a simulated workspace profile for the dashboard.'
-              : 'Enter your details to sign in to your dashboard account.'}
-          </p>
+              <label className="auth-field" htmlFor="email-login-03">
+                <span>Email</span>
+                <input
+                  type="email"
+                  id="email-login-03"
+                  name="email-login-03"
+                  autoComplete="email"
+                  placeholder="agent@ocpgroup.ma"
+                  defaultValue="agent@ocpgroup.ma"
+                  required
+                />
+              </label>
 
-          {isSignup && (
-            <label className="auth-field">
-              <span>Full Name</span>
-              <input name="name" type="text" placeholder="ex: A. Benali" required />
-            </label>
-          )}
+              <label className="auth-field" htmlFor="password-login-03">
+                <span>Password</span>
+                <div className="auth-pass-wrap">
+                  <input
+                    type={showSecret ? 'text' : 'password'}
+                    id="password-login-03"
+                    name="password-login-03"
+                    autoComplete="current-password"
+                    placeholder="**************"
+                    defaultValue="123456"
+                    required
+                  />
+                  <button
+                    type="button"
+                    className="auth-hide"
+                    onClick={() => setShowSecret((value) => !value)}
+                  >
+                    {showSecret ? 'Hide' : 'Show'}
+                  </button>
+                </div>
+              </label>
 
-          <label className="auth-field">
-            <span>Email / Phone No</span>
-            <input
-              name="email"
-              type="text"
-              placeholder="agent@ocpgroup.ma"
-              defaultValue={isSignup ? '' : 'agent@ocpgroup.ma'}
-              required
-            />
-          </label>
-
-          <label className="auth-field">
-            <span>{isSignup ? 'Create Passcode' : 'Passcode'}</span>
-            <div className="auth-pass-wrap">
-              <input
-                name="passcode"
-                type={showSecret ? 'text' : 'password'}
-                placeholder="Enter passcode"
-                defaultValue={isSignup ? '' : '123456'}
-                required
-              />
-              <button
-                type="button"
-                className="auth-hide"
-                onClick={() => setShowSecret((value) => !value)}
-              >
-                {showSecret ? 'Hide' : 'Show'}
+              <button className="auth-submit" type="submit" disabled={loading}>
+                {loading ? 'Please wait...' : 'Sign in'}
               </button>
+
+              <p className="auth-helper">
+                Forgot your password? <button type="button">Reset password</button>
+              </p>
+
+              <p className="auth-switch">
+                Don&apos;t have an account?{' '}
+                <button type="button" onClick={() => switchMode('signup')}>
+                  Sign up
+                </button>
+              </p>
+
+              <p className="auth-notice" aria-live="polite">
+                {notice || 'Simulation only. Any valid details will open the app.'}
+              </p>
+            </form>
+          ) : (
+            <div className="auth-signup-shell">
+              <div className="auth-signup-head">
+                <div className="auth-mark" aria-hidden="true">
+                  OCP
+                </div>
+                <h3>Create new account for workspace</h3>
+              </div>
+
+              <form className="auth-form auth-card" onSubmit={submitAuth} key={mode}>
+                <label className="auth-field" htmlFor="name-login-05">
+                  <span>Name</span>
+                  <input
+                    type="text"
+                    id="name-login-05"
+                    name="name-login-05"
+                    autoComplete="name"
+                    placeholder="Name"
+                    required
+                  />
+                </label>
+
+                <label className="auth-field" htmlFor="email-login-05">
+                  <span>Email</span>
+                  <input
+                    type="email"
+                    id="email-login-05"
+                    name="email-login-05"
+                    autoComplete="email"
+                    placeholder="agent@ocpgroup.ma"
+                    required
+                  />
+                </label>
+
+                <label className="auth-field" htmlFor="password-login-05">
+                  <span>Password</span>
+                  <div className="auth-pass-wrap">
+                    <input
+                      type={showSecret ? 'text' : 'password'}
+                      id="password-login-05"
+                      name="password-login-05"
+                      autoComplete="new-password"
+                      placeholder="Password"
+                      required
+                    />
+                    <button
+                      type="button"
+                      className="auth-hide"
+                      onClick={() => setShowSecret((value) => !value)}
+                    >
+                      {showSecret ? 'Hide' : 'Show'}
+                    </button>
+                  </div>
+                </label>
+
+                <label className="auth-field" htmlFor="confirm-password-login-05">
+                  <span>Confirm password</span>
+                  <input
+                    type="password"
+                    id="confirm-password-login-05"
+                    name="confirm-password-login-05"
+                    autoComplete="new-password"
+                    placeholder="Password"
+                    required
+                  />
+                </label>
+
+                <label className="auth-check" htmlFor="newsletter-login-05">
+                  <input id="newsletter-login-05" name="newsletter-login-05" type="checkbox" />
+                  <span>Sign up to our newsletter</span>
+                </label>
+
+                <button className="auth-submit" type="submit" disabled={loading}>
+                  {loading ? 'Please wait...' : 'Create account'}
+                </button>
+
+                <p className="auth-terms">
+                  By signing in, you agree to our <button type="button">Terms of use</button> and{' '}
+                  <button type="button">Privacy policy</button>
+                </p>
+              </form>
+
+              <p className="auth-switch auth-switch-outside">
+                Already have an account?{' '}
+                <button type="button" onClick={() => switchMode('signin')}>
+                  Sign in
+                </button>
+              </p>
+
+              <p className="auth-notice" aria-live="polite">
+                {notice || 'Simulation only. Any valid details will open the app.'}
+              </p>
             </div>
-          </label>
-
-          {isSignup && (
-            <label className="auth-field">
-              <span>Site / Unit</span>
-              <select name="site" defaultValue="Khouribga">
-                <option>Khouribga</option>
-                <option>Jorf Lasfar</option>
-                <option>Safi</option>
-                <option>Laayoune</option>
-              </select>
-            </label>
           )}
-
-          <button className="auth-submit" type="submit" disabled={loading}>
-            {loading ? 'Please wait...' : isSignup ? 'Create Account' : 'Sign in'}
-          </button>
-
-          <p className="auth-switch">
-            {isSignup ? 'Already have an account?' : "Don't have an account?"}{' '}
-            <button type="button" onClick={() => switchMode(isSignup ? 'signin' : 'signup')}>
-              {isSignup ? 'Sign in' : 'Request Now'}
-            </button>
-          </p>
-
-          <p className="auth-notice" aria-live="polite">
-            {notice || 'Simulation only. Any valid details will open the app.'}
-          </p>
-        </form>
-
-        <div className="auth-art auth-art-right" aria-hidden="true">
-          <div className="auth-panel">
-            <span />
-            <span />
-          </div>
-          <div className="auth-person">
-            <span className="auth-head" />
-            <span className="auth-body" />
-            <span className="auth-laptop" />
-            <span className="auth-leg auth-leg-one" />
-            <span className="auth-leg auth-leg-two" />
-          </div>
-          <div className="auth-base" />
-          <div className="auth-tower auth-tower-small">
-            <i />
-            <i />
-            <i />
-            <i />
-            <i />
-            <i />
-          </div>
         </div>
 
         <footer className="auth-footer">
