@@ -32,7 +32,7 @@ const ROLE_SUMMARIES = {
   DG: [
     {
       title: 'Vue executive',
-      body: 'Accedez aux dashboards, initiatives, comite, news, matrice des risques et IA.',
+      body: 'Accedez aux dashboards, projets, comite, news, matrice des risques et IA.',
       stat: '6 acces',
       tone: 'var(--g)',
     },
@@ -82,7 +82,7 @@ const ROLE_LABELS = {
     ai: 'IA',
   },
   DG: {
-    init: 'Initiatives',
+    init: 'Projets',
     risk: 'Matrice des Risques',
     exec: 'Comite',
     ai: 'IA',
@@ -103,7 +103,7 @@ const ROLE_LABELS = {
 
 const DEFAULT_PAGE_LABELS = {
   dash: 'Dashboards',
-  init: 'Initiatives',
+  init: 'Projets',
   gantt: 'Gantt',
   sim: 'Simulation',
   risk: 'Matrice des Risques',
@@ -330,6 +330,58 @@ function applyRoleLabels(root, user) {
   });
 }
 
+function applyProjectTerminology(root) {
+  if (!root) return;
+
+  const replaceText = (selector, matcher, value) => {
+    root.querySelectorAll(selector).forEach((node) => {
+      const text = node.textContent?.trim();
+      if (text === matcher) {
+        node.textContent = value;
+      }
+    });
+  };
+
+  replaceText('.nav-tip', 'Initiatives', 'Projets');
+  replaceText('.btn-new', '📋 Initiatives', '📋 Projets');
+  replaceText('.btn-new', '+ Nouvelle Initiative', '+ Nouveau Projet');
+  replaceText('.kpi-lbl', 'Initiatives Actives', 'Projets Actifs');
+  replaceText('.ct', '📈 Initiatives Créées / Semaine', '📈 Projets Créés / Semaine');
+  replaceText('.ct', '🗺 Initiatives par Site', '🗺 Projets par Site');
+  replaceText('.modal-title', 'Créer une Initiative', 'Créer un Projet');
+  replaceText('.form-label', 'Code Initiative *', 'Code Projet *');
+  replaceText('.form-label', "Nom de l'initiative *", 'Nom du projet *');
+
+  root.querySelectorAll('*').forEach((node) => {
+    if (!node.children.length && typeof node.textContent === 'string') {
+      if (node.textContent.includes('INITIATIVES CE TRIMESTRE')) {
+        node.textContent = node.textContent.replace('INITIATIVES CE TRIMESTRE', 'PROJETS CE TRIMESTRE');
+      }
+
+      if (node.textContent.includes('INITIATIVES')) {
+        node.textContent = node.textContent.replace('INITIATIVES', 'PROJETS');
+      }
+
+      if (node.textContent.includes('24 initiatives · 4 sites')) {
+        node.textContent = node.textContent.replace('24 initiatives · 4 sites', '24 projets · 4 sites');
+      }
+    }
+  });
+
+  const descriptionField = root.querySelector('#f-desc');
+  if (descriptionField?.getAttribute('placeholder')) {
+    descriptionField.setAttribute(
+      'placeholder',
+      "Décrivez l'état actuel du projet, les actions déjà réalisées, les blocages éventuels...",
+    );
+  }
+
+  const submitButton = root.querySelector('.modal .btn-submit');
+  if (submitButton?.textContent?.trim() === '✓ Créer l\'Initiative') {
+    submitButton.textContent = '✓ Créer le Projet';
+  }
+}
+
 function injectRoleSummary(root, user, onSignOut) {
   if (!root || !user) return;
 
@@ -516,6 +568,7 @@ export default function MinXView() {
 
     const syncUi = () => {
       ensureRoleSpecificPages(appRef.current);
+      applyProjectTerminology(appRef.current);
       applyRoleLabels(appRef.current, user);
       applyRoleAccess(appRef.current, user);
       injectRoleSummary(appRef.current, user, handleSignOut);
