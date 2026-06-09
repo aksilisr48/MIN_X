@@ -859,3 +859,29 @@ img,svg,canvas,video{max-width:100%}
   .modal-overlay{align-items:stretch}
   .level-selector{display:grid;grid-template-columns:1fr 1fr}
 }
+
+/* ROLE DEMO */
+.demo-portal{min-height:100vh}
+.demo-nav-glyph{
+  width:18px;height:18px;border-radius:5px;display:inline-flex;align-items:center;justify-content:center;
+  background:rgba(0,132,61,0.1);color:var(--g);font-family:'Barlow Condensed';font-size:11px;
+  font-weight:700;letter-spacing:.5px;flex:0 0 18px;
+}
+.demo-user-summary{display:flex;flex-wrap:wrap;gap:8px}
+.demo-hero-card{margin-bottom:16px}
+.demo-hero{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.demo-hero-title{font-size:28px;line-height:1.1;margin:6px 0 10px;color:var(--t1)}
+.demo-copy{font-size:13px;line-height:1.6;color:var(--t2)}
+.demo-metric{font-family:'Bebas Neue';font-size:40px;line-height:1;color:var(--g);margin-bottom:8px}
+.demo-stack{display:flex;flex-direction:column;gap:10px}
+.demo-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;border:1px solid var(--border);border-radius:8px;background:var(--bg2)}
+.demo-section-block{display:flex;flex-direction:column;gap:16px}
+
+@media (max-width:860px){
+  .demo-hero{flex-direction:column}
+}
+
+@media (max-width:720px){
+  .demo-nav-glyph{width:28px;height:28px;border-radius:8px;font-size:12px}
+  .demo-user-summary{width:100%}
+}
