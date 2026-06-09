@@ -158,7 +158,7 @@ function applyRoleAccess(root, user) {
 
   const topbarDate = root.querySelector('.tb-date');
   if (topbarDate) {
-    topbarDate.textContent = `${user.role} · ${user.email}`;
+    topbarDate.textContent = `${user.role} - ${user.email}`;
   }
 }
 
@@ -360,7 +360,6 @@ export default function MinXView() {
       window.updateSim = previousUpdateSim;
       window.loadScenario = previousLoadScenario;
       window.toggleSidebar = previousToggleSidebar;
-      appRef.current?.querySelector('[data-demo-role-summary]')?.remove();
       appRef.current?.querySelectorAll('[data-demo-role-summary]').forEach((node) => node.remove());
     };
   }, [user]);
