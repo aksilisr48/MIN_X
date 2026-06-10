@@ -8,10 +8,10 @@ const STORAGE_KEY = 'demo-user';
 const ROLE_OPTIONS = ['Chef de projet', 'DG', 'Manager', 'Technicien'];
 
 const ROLE_ACCESS = {
-  'Chef de projet': ['news', 'dash', 'init', 'risk', 'gantt', 'sim', 'pred', 'exec', 'ai'],
-  DG: ['dash', 'init', 'exec', 'news', 'risk', 'ai'],
-  Manager: ['news', 'dash', 'init', 'risk', 'gantt', 'sim', 'exec', 'ai'],
-  Technicien: ['news', 'dash', 'tech-sheet', 'task-checklist', 'ai', 'risk'],
+  'Chef de projet': ['news', 'dash', 'init', 'risk', 'gantt', 'sim', 'pred', 'exec', 'ai', 'rca'],
+  DG: ['dash', 'init', 'exec', 'news', 'risk', 'ai', 'rca'],
+  Manager: ['news', 'dash', 'init', 'risk', 'gantt', 'sim', 'exec', 'ai', 'rca'],
+  Technicien: ['news', 'dash', 'tech-sheet', 'task-checklist', 'failure-report', 'ai', 'rca'],
 };
 
 const ROLE_SUMMARIES = {
@@ -60,13 +60,13 @@ const ROLE_SUMMARIES = {
   Technicien: [
     {
       title: 'Execution terrain',
-      body: 'Recentrez-vous sur la fiche technique, les checklists terrain, les news et les risques.',
-      stat: '6 acces',
+      body: 'Recentrez-vous sur la fiche technique, les checklists terrain, les news et les signalements de panne.',
+      stat: '7 acces',
       tone: 'var(--g)',
     },
     {
       title: 'Maintenance critique',
-      body: 'Les sections affichees privilegient les controles, les taches journalieres et les analyses IA.',
+      body: 'Les sections affichees privilegient les controles, les taches journalieres, les signalements et les analyses RCA.',
       stat: '14 controles',
       tone: 'var(--gold)',
     },
@@ -94,10 +94,10 @@ const ROLE_LABELS = {
     ai: 'IA',
   },
   Technicien: {
-    risk: 'Matrice des Risques',
     ai: 'IA',
     'tech-sheet': 'Fiche technique',
     'task-checklist': 'Taches et checklist',
+    'failure-report': 'Signalement de la panne',
   },
 };
 
@@ -111,8 +111,181 @@ const DEFAULT_PAGE_LABELS = {
   pred: 'Predictions',
   news: 'News',
   exec: 'Comite',
+  rca: 'RCA',
   'tech-sheet': 'Fiche technique',
   'task-checklist': 'Taches et checklist',
+  'failure-report': 'Signalement de la panne',
+};
+
+const NEWS_ARTICLES = {
+  ai: {
+    category: 'Technology',
+    date: 'June 9, 2026',
+    readTime: '7 min read',
+    title: 'AI is reshaping business decision-making',
+    dek: 'The next phase of artificial intelligence is less about isolated experiments and more about building a reliable decision layer across the business.',
+    art: 'news-art-ai',
+    paragraphs: [
+      'Artificial intelligence is moving into the daily rhythm of operations. Planning teams are using it to compare scenarios, detect unusual patterns, and bring the most important signals to decision-makers before a problem becomes visible in a monthly report.',
+      'The strongest results come from focused systems connected to trusted operational data. Instead of asking one model to solve every problem, companies are combining forecasting, workflow automation, and human review around a small number of high-value decisions.',
+      'That shift also changes leadership priorities. Data quality, clear ownership, and transparent controls now matter as much as model performance. Organizations that define those foundations early can move faster without losing accountability.',
+    ],
+    takeaway: 'Practical AI creates value when it improves a specific decision, has a clear owner, and remains easy for teams to review.',
+  },
+  markets: {
+    category: 'Economy',
+    date: 'June 8, 2026',
+    readTime: '5 min read',
+    title: 'Global markets react to new economic trends',
+    dek: 'Investors are balancing slower inflation, uneven growth, and a new wave of industrial spending.',
+    art: 'news-art-market',
+    paragraphs: [
+      'Markets are responding to a mixed economic picture. Consumer demand remains resilient in several regions, while higher financing costs continue to influence construction, logistics, and capital-intensive industries.',
+      'Industrial companies are adapting by protecting cash flow and prioritizing investments that improve energy efficiency, supply reliability, or production flexibility. Projects with measurable operational benefits are receiving faster approval than broad transformation programs.',
+      'Analysts expect volatility to remain part of the landscape, but they also see opportunity in businesses with strong local supply networks and disciplined investment plans.',
+    ],
+    takeaway: 'The market is rewarding companies that can turn uncertainty into focused, measurable investment choices.',
+  },
+  startups: {
+    category: 'Innovation',
+    date: 'June 7, 2026',
+    readTime: '4 min read',
+    title: 'Startups accelerate digital innovation',
+    dek: 'Smaller technology firms are shortening the path from industrial problem to working solution.',
+    art: 'news-art-startup',
+    paragraphs: [
+      'A new generation of startups is building tools around specific operational needs, from equipment inspection to energy forecasting and field collaboration.',
+      'Their advantage is speed. Small teams can test a narrow use case, learn directly from operators, and adjust the product before a large implementation begins.',
+      'Partnerships work best when the business provides access to real users, clear performance targets, and a route from pilot to deployment. Without that path, even promising demonstrations can remain stuck in the laboratory.',
+    ],
+    takeaway: 'A successful pilot needs a business owner and a deployment plan from its first day.',
+  },
+  investment: {
+    category: 'Business',
+    date: 'June 6, 2026',
+    readTime: '6 min read',
+    title: 'Technology investment grows in emerging markets',
+    dek: 'Digital infrastructure and local talent are attracting a broader mix of long-term capital.',
+    art: 'news-art-investment',
+    paragraphs: [
+      'Investment in emerging technology markets is expanding beyond consumer applications. Capital is increasingly flowing toward cloud infrastructure, industrial software, cybersecurity, and specialized engineering services.',
+      'The change reflects growing demand from local enterprises that want solutions designed for their operating conditions. Investors are also paying closer attention to teams that combine technical expertise with a deep understanding of regional industries.',
+      'For established companies, the trend creates more options for local partnerships and faster access to specialized capabilities.',
+    ],
+    takeaway: 'Local expertise is becoming a strategic advantage in the next wave of technology investment.',
+  },
+  productivity: {
+    category: 'Tech',
+    date: 'June 5, 2026',
+    readTime: '4 min read',
+    title: 'New tools improve productivity in companies',
+    dek: 'Connected workflows are reducing administrative effort and giving teams more time for higher-value work.',
+    art: 'news-art-productivity',
+    paragraphs: [
+      'Productivity gains are increasingly coming from small improvements across an entire workflow rather than one dramatic automation project.',
+      'Modern tools can collect updates automatically, route approvals to the right person, and keep operational context attached to each task. That reduces the time teams spend searching for information or rebuilding reports.',
+      'The best implementations measure both time saved and decision quality. This helps leaders distinguish useful automation from technology that simply adds another screen.',
+    ],
+    takeaway: 'The most useful productivity tool is the one that removes a repeated delay from real work.',
+  },
+  cloud: {
+    category: 'Digital transformation',
+    date: 'June 4, 2026',
+    readTime: '5 min read',
+    title: 'Cloud platforms become essential business infrastructure',
+    dek: 'Cloud strategy is shifting from migration targets toward resilient, well-governed operating platforms.',
+    art: 'news-art-digital',
+    paragraphs: [
+      'Cloud platforms now support core analytics, customer services, and collaboration across many organizations. The conversation has moved beyond where systems are hosted to how quickly teams can build and improve services.',
+      'This flexibility requires stronger governance. Clear cost controls, shared architecture standards, and reliable identity management prevent a flexible platform from becoming a fragmented one.',
+      'Many leaders are adopting a hybrid approach, placing each workload according to performance, security, and operational needs rather than following a single migration rule.',
+    ],
+    takeaway: 'Cloud value comes from operating discipline, not migration volume.',
+  },
+  green: {
+    category: 'Business',
+    date: 'June 3, 2026',
+    readTime: '6 min read',
+    title: 'Green industry creates new growth opportunities',
+    dek: 'Cleaner energy and circular production are becoming engines of competitiveness as well as sustainability.',
+    art: 'news-art-green',
+    paragraphs: [
+      'Industrial sustainability programs are moving closer to the center of business strategy. Energy efficiency, water reuse, and waste recovery can lower operating costs while improving resilience.',
+      'The most attractive projects connect environmental outcomes to production economics. A clear baseline makes it possible to compare alternatives and track whether expected savings appear after deployment.',
+      'New supplier ecosystems are also emerging around renewable power, low-carbon materials, and industrial recycling, creating room for investment and specialized jobs.',
+    ],
+    takeaway: 'Green industry grows fastest when environmental progress and operational value are measured together.',
+  },
+  supply: {
+    category: 'Economy',
+    date: 'June 2, 2026',
+    readTime: '3 min read',
+    title: 'Why supply chains are becoming more regional',
+    dek: 'Companies are redesigning critical supply networks around resilience, visibility, and shorter response times.',
+    art: 'news-art-market',
+    paragraphs: [
+      'Recent disruptions have encouraged companies to look beyond the lowest unit cost when selecting suppliers. Lead-time stability and access to alternatives now carry more weight.',
+      'Regional networks can reduce transport uncertainty and make collaboration easier, although they require careful supplier development and realistic capacity planning.',
+      'Digital visibility helps procurement teams identify concentration risks and respond before a delay reaches production.',
+    ],
+    takeaway: 'Resilience improves when supply choices reflect total operational risk, not price alone.',
+  },
+  industrialData: {
+    category: 'Innovation',
+    date: 'June 1, 2026',
+    readTime: '5 min read',
+    title: 'Research teams turn industrial data into practical tools',
+    dek: 'Closer collaboration between researchers and operators is producing solutions that work beyond the prototype.',
+    art: 'news-art-startup',
+    paragraphs: [
+      'Industrial research is becoming more applied as teams work directly with maintenance specialists, planners, and field technicians.',
+      'Shared problem definitions help researchers choose useful signals and design outputs that fit existing routines. This often matters more than adding complexity to the model.',
+      'Organizations are also creating reusable data foundations so each new project does not begin with months of preparation.',
+    ],
+    takeaway: 'Research reaches the field faster when operators help define both the problem and the result.',
+  },
+  cyber: {
+    category: 'Technology',
+    date: 'May 31, 2026',
+    readTime: '4 min read',
+    title: 'Cybersecurity spending rises as operations connect',
+    dek: 'Connected equipment brings valuable visibility, but it also expands the responsibility for protecting operations.',
+    art: 'news-art-ai',
+    paragraphs: [
+      'As industrial systems become more connected, cybersecurity programs are expanding beyond office networks to include operational technology and remote access.',
+      'Leaders are prioritizing asset inventories, network segmentation, and rapid recovery plans. These controls provide a practical foundation before more advanced monitoring is introduced.',
+      'Security teams are also working more closely with operations so protection measures support safety and availability instead of disrupting them.',
+    ],
+    takeaway: 'Operational cybersecurity starts with knowing what is connected and how the business would recover.',
+  },
+  value: {
+    category: 'Business',
+    date: 'May 30, 2026',
+    readTime: '6 min read',
+    title: 'Executives put measurable value at the center of digital plans',
+    dek: 'Transformation portfolios are being simplified around outcomes that teams can verify.',
+    art: 'news-art-investment',
+    paragraphs: [
+      'Executive teams are asking digital programs to connect investment directly to revenue, cost, risk, or customer outcomes.',
+      'This is reducing the number of disconnected pilots and encouraging shared platforms that can support several use cases. Regular value reviews also make it easier to stop work that no longer justifies its cost.',
+      'The approach does not eliminate experimentation. It creates clearer rules for learning, scaling, and deciding what comes next.',
+    ],
+    takeaway: 'A digital roadmap becomes credible when every major initiative has a measurable business outcome.',
+  },
+  briefing: {
+    category: 'Weekly briefing',
+    date: 'June 9, 2026',
+    readTime: '8 min read',
+    title: 'Five signals shaping the next business cycle',
+    dek: 'A concise view of the forces influencing investment, operations, talent, technology, and sustainability.',
+    art: 'news-art-digital',
+    paragraphs: [
+      'First, capital is becoming more selective, favoring projects with short feedback loops and visible operating impact. Second, regional supply networks are gaining importance as resilience becomes part of everyday planning.',
+      'Third, practical AI is moving into specific decisions rather than broad demonstrations. Fourth, demand for hybrid technical and business skills is changing how companies build teams.',
+      'Finally, energy and resource efficiency are becoming core measures of industrial competitiveness. Together, these signals point toward a cycle defined by disciplined innovation.',
+    ],
+    takeaway: 'The next cycle will favor organizations that combine focused investment with the ability to learn quickly.',
+  },
 };
 
 const NEWS_PAGE_MARKUP = `
@@ -131,7 +304,7 @@ const NEWS_PAGE_MARKUP = `
     </header>
 
     <section class="news-lead-layout" aria-label="Featured news">
-      <article class="news-feature-card">
+      <article class="news-feature-card" data-news-article="ai">
         <div class="news-feature-visual news-art-ai">
           <span class="news-badge news-badge-light">Technology</span>
           <div class="news-visual-stamp">01</div>
@@ -140,7 +313,7 @@ const NEWS_PAGE_MARKUP = `
           <div class="news-date">June 9, 2026 <span></span> 7 min read</div>
           <h2>AI is reshaping business decision-making</h2>
           <p>From forecasting demand to managing complex operations, artificial intelligence is moving from experimental pilots into the center of executive strategy.</p>
-          <a class="news-read-link" href="#news-ai">Read full story <span aria-hidden="true">+</span></a>
+          <a class="news-read-link" href="#news-ai" data-news-article="ai">Read full story <span aria-hidden="true">+</span></a>
         </div>
       </article>
 
@@ -149,7 +322,7 @@ const NEWS_PAGE_MARKUP = `
           <span>Top stories</span>
           <span class="news-section-line"></span>
         </div>
-        <article class="news-side-card">
+        <article class="news-side-card" data-news-article="markets" tabindex="0" role="link">
           <div class="news-side-visual news-art-market"></div>
           <div class="news-side-copy">
             <span class="news-badge">Economy</span>
@@ -157,7 +330,7 @@ const NEWS_PAGE_MARKUP = `
             <div class="news-date">June 8, 2026 <span></span> 5 min</div>
           </div>
         </article>
-        <article class="news-side-card">
+        <article class="news-side-card" data-news-article="startups" tabindex="0" role="link">
           <div class="news-side-visual news-art-startup"></div>
           <div class="news-side-copy">
             <span class="news-badge news-badge-blue">Innovation</span>
@@ -165,7 +338,7 @@ const NEWS_PAGE_MARKUP = `
             <div class="news-date">June 7, 2026 <span></span> 4 min</div>
           </div>
         </article>
-        <article class="news-side-card">
+        <article class="news-side-card" data-news-article="investment" tabindex="0" role="link">
           <div class="news-side-visual news-art-investment"></div>
           <div class="news-side-copy">
             <span class="news-badge news-badge-dark">Business</span>
@@ -186,7 +359,7 @@ const NEWS_PAGE_MARKUP = `
           <a href="#all-news">View all news <span aria-hidden="true">+</span></a>
         </div>
         <div class="news-card-grid">
-          <article class="news-story-card">
+          <article class="news-story-card" data-news-article="productivity">
             <div class="news-story-visual news-art-productivity">
               <span class="news-story-index">02</span>
             </div>
@@ -196,11 +369,11 @@ const NEWS_PAGE_MARKUP = `
               <p>Connected workflows are helping teams reduce repetitive work and focus on decisions that create measurable value.</p>
               <div class="news-story-footer">
                 <span>June 5, 2026</span>
-                <a href="#news-productivity" aria-label="Read productivity story">+</a>
+                <a href="#news-productivity" data-news-article="productivity" aria-label="Read productivity story">+</a>
               </div>
             </div>
           </article>
-          <article class="news-story-card">
+          <article class="news-story-card" data-news-article="cloud">
             <div class="news-story-visual news-art-digital">
               <span class="news-story-index">03</span>
             </div>
@@ -210,11 +383,11 @@ const NEWS_PAGE_MARKUP = `
               <p>Leaders are consolidating data, operations, and customer services on flexible digital foundations.</p>
               <div class="news-story-footer">
                 <span>June 4, 2026</span>
-                <a href="#news-cloud" aria-label="Read cloud platforms story">+</a>
+                <a href="#news-cloud" data-news-article="cloud" aria-label="Read cloud platforms story">+</a>
               </div>
             </div>
           </article>
-          <article class="news-story-card">
+          <article class="news-story-card" data-news-article="green">
             <div class="news-story-visual news-art-green">
               <span class="news-story-index">04</span>
             </div>
@@ -224,7 +397,7 @@ const NEWS_PAGE_MARKUP = `
               <p>Efficiency, cleaner energy, and circular production models are opening new paths for industrial investment.</p>
               <div class="news-story-footer">
                 <span>June 3, 2026</span>
-                <a href="#news-green" aria-label="Read green industry story">+</a>
+                <a href="#news-green" data-news-article="green" aria-label="Read green industry story">+</a>
               </div>
             </div>
           </article>
@@ -237,7 +410,7 @@ const NEWS_PAGE_MARKUP = `
           <h2>Trending News</h2>
         </div>
         <ol class="news-trending-list">
-          <li>
+          <li data-news-article="supply" tabindex="0" role="link">
             <span>01</span>
             <div>
               <small>Economy</small>
@@ -245,7 +418,7 @@ const NEWS_PAGE_MARKUP = `
               <p>3 min read</p>
             </div>
           </li>
-          <li>
+          <li data-news-article="industrialData" tabindex="0" role="link">
             <span>02</span>
             <div>
               <small>Innovation</small>
@@ -253,7 +426,7 @@ const NEWS_PAGE_MARKUP = `
               <p>5 min read</p>
             </div>
           </li>
-          <li>
+          <li data-news-article="cyber" tabindex="0" role="link">
             <span>03</span>
             <div>
               <small>Technology</small>
@@ -261,7 +434,7 @@ const NEWS_PAGE_MARKUP = `
               <p>4 min read</p>
             </div>
           </li>
-          <li>
+          <li data-news-article="value" tabindex="0" role="link">
             <span>04</span>
             <div>
               <small>Business</small>
@@ -273,11 +446,37 @@ const NEWS_PAGE_MARKUP = `
         <div class="news-brief-card">
           <span>Weekly briefing</span>
           <h3>Five signals shaping the next business cycle.</h3>
-          <a href="#news-brief">Explore the briefing <span aria-hidden="true">+</span></a>
+          <a href="#news-brief" data-news-article="briefing">Explore the briefing <span aria-hidden="true">+</span></a>
         </div>
       </aside>
     </section>
   </div>
+  <article class="news-article-page" id="news-reader" aria-hidden="true" aria-labelledby="news-reader-title">
+    <div class="news-article-toolbar">
+      <button type="button" class="news-reader-return news-reader-return-top" data-news-close>
+        <span aria-hidden="true">←</span> Back to News
+      </button>
+      <span>MINE X / Business intelligence</span>
+    </div>
+    <div class="news-article-layout">
+      <div class="news-reader-hero" id="news-reader-hero">
+        <span class="news-badge news-badge-light" id="news-reader-category"></span>
+      </div>
+      <div class="news-reader-content">
+        <div class="news-date"><b id="news-reader-date"></b><i></i><b id="news-reader-time"></b></div>
+        <h2 id="news-reader-title"></h2>
+        <p class="news-reader-dek" id="news-reader-dek"></p>
+        <div class="news-reader-copy" id="news-reader-copy"></div>
+        <aside class="news-reader-takeaway">
+          <span>Key takeaway</span>
+          <p id="news-reader-takeaway"></p>
+        </aside>
+        <button type="button" class="news-reader-return" data-news-close>
+          <span aria-hidden="true">←</span> Back to all news
+        </button>
+      </div>
+    </div>
+  </article>
 </div>
 `;
 
@@ -398,6 +597,186 @@ function buildPlaceholderPage(pageId, title, subtitle, sections) {
   return page;
 }
 
+function setupNewsArticles(root) {
+  const page = root?.querySelector('#page-news');
+  const newsHome = root?.querySelector('#page-news .news-shell');
+  const reader = root?.querySelector('#news-reader');
+  if (!page || !newsHome || !reader || page.dataset.newsReady === 'true') return;
+
+  page.dataset.newsReady = 'true';
+
+  page.querySelectorAll('[data-news-article]').forEach((trigger) => {
+    if (!trigger.matches('a, button, [tabindex]')) {
+      trigger.tabIndex = 0;
+      trigger.setAttribute('role', 'link');
+    }
+  });
+
+  const closeReader = () => {
+    reader.classList.remove('open');
+    reader.setAttribute('aria-hidden', 'true');
+    newsHome.hidden = false;
+    window.history.replaceState(null, '', '#news');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const openReader = (articleId) => {
+    const article = NEWS_ARTICLES[articleId];
+    if (!article) return;
+
+    const hero = reader.querySelector('#news-reader-hero');
+    hero.className = `news-reader-hero ${article.art}`;
+    reader.querySelector('#news-reader-category').textContent = article.category;
+    reader.querySelector('#news-reader-date').textContent = article.date;
+    reader.querySelector('#news-reader-time').textContent = article.readTime;
+    reader.querySelector('#news-reader-title').textContent = article.title;
+    reader.querySelector('#news-reader-dek').textContent = article.dek;
+    reader.querySelector('#news-reader-takeaway').textContent = article.takeaway;
+
+    const copy = reader.querySelector('#news-reader-copy');
+    copy.innerHTML = '';
+    article.paragraphs.forEach((paragraph) => {
+      const text = document.createElement('p');
+      text.textContent = paragraph;
+      copy.appendChild(text);
+    });
+
+    newsHome.hidden = true;
+    reader.classList.add('open');
+    reader.setAttribute('aria-hidden', 'false');
+    window.history.replaceState(null, '', `#news-${articleId}`);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    reader.querySelector('.news-reader-return-top')?.focus({ preventScroll: true });
+  };
+
+  page.addEventListener('click', (event) => {
+    const closeTrigger = event.target.closest('[data-news-close]');
+    if (closeTrigger) {
+      event.preventDefault();
+      closeReader();
+      return;
+    }
+
+    const articleTrigger = event.target.closest('[data-news-article]');
+    if (!articleTrigger) return;
+
+    event.preventDefault();
+    openReader(articleTrigger.dataset.newsArticle);
+  });
+
+  page.addEventListener('keydown', (event) => {
+    if ((event.key === 'Enter' || event.key === ' ') && event.target.matches('[data-news-article]')) {
+      event.preventDefault();
+      openReader(event.target.dataset.newsArticle);
+    }
+  });
+}
+
+function setupFailureReporting(root) {
+  const form = root?.querySelector('#failure-report-form');
+  const history = root?.querySelector('#failure-report-history');
+  const notice = root?.querySelector('#failure-report-notice');
+  const dateInput = root?.querySelector('#failure-date');
+  if (!form || !history || form.dataset.ready === 'true') return;
+
+  const storageKey = 'minx-failure-reports';
+  form.dataset.ready = 'true';
+
+  const readReports = () => {
+    try {
+      return JSON.parse(window.localStorage.getItem(storageKey) || '[]');
+    } catch {
+      return [];
+    }
+  };
+
+  const renderReports = () => {
+    const reports = readReports();
+    history.innerHTML = '';
+
+    if (!reports.length) {
+      history.innerHTML =
+        '<div style="padding:18px;text-align:center;color:var(--t3);font-size:12px">Aucun signalement enregistre.</div>';
+      return;
+    }
+
+    reports.slice(0, 5).forEach((report) => {
+      const item = document.createElement('div');
+      item.className = 'why-row';
+      item.style.marginBottom = '8px';
+
+      const severityColor =
+        report.severity === 'Critique'
+          ? 'var(--red)'
+          : report.severity === 'Elevee'
+            ? 'var(--gold)'
+            : 'var(--g)';
+
+      item.innerHTML = `
+        <div class="why-num" style="background:${severityColor};color:#fff">!</div>
+        <div class="why-content">
+          <div style="display:flex;justify-content:space-between;gap:10px;align-items:center">
+            <div class="why-a" style="font-weight:600;color:var(--t1)"></div>
+            <span class="tag" style="color:${severityColor};border-color:${severityColor}"></span>
+          </div>
+          <div class="why-q" style="margin-top:4px"></div>
+          <div style="font-size:10px;color:var(--t3);margin-top:5px"></div>
+        </div>
+      `;
+
+      item.querySelector('.why-a').textContent = `${report.reference} - ${report.equipment}`;
+      item.querySelector('.tag').textContent = report.severity;
+      item.querySelector('.why-q').textContent = report.description;
+      item.querySelector('div[style*="font-size:10px"]').textContent =
+        `${report.location} - ${report.date}`;
+      history.appendChild(item);
+    });
+  };
+
+  if (dateInput && !dateInput.value) {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    dateInput.value = now.toISOString().slice(0, 16);
+  }
+
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    if (!form.reportValidity()) return;
+
+    const data = new FormData(form);
+    const reports = readReports();
+    const reference = `SIG-${new Date().toISOString().slice(0, 10).replaceAll('-', '')}-${String(
+      reports.length + 1,
+    ).padStart(3, '0')}`;
+    const report = {
+      reference,
+      equipment: data.get('equipment'),
+      location: data.get('location'),
+      severity: data.get('severity'),
+      date: data.get('date').replace('T', ' '),
+      downtime: data.get('downtime') || 'Non estime',
+      symptom: data.get('symptom'),
+      description: data.get('description'),
+      isolated: data.get('isolated') === 'on',
+    };
+
+    window.localStorage.setItem(storageKey, JSON.stringify([report, ...reports]));
+    form.reset();
+    if (dateInput) {
+      const now = new Date();
+      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+      dateInput.value = now.toISOString().slice(0, 16);
+    }
+    if (notice) {
+      notice.textContent = `Signalement ${reference} transmis au responsable maintenance.`;
+      notice.style.display = 'block';
+    }
+    renderReports();
+  });
+
+  renderReports();
+}
+
 function ensureRoleSpecificPages(root) {
   if (!root) return;
 
@@ -450,6 +829,103 @@ function ensureRoleSpecificPages(root) {
     main.insertBefore(checklistPage, footer);
   }
 
+  if (!root.querySelector('#page-failure-report')) {
+    const failureReportPage = document.createElement('div');
+    failureReportPage.className = 'page';
+    failureReportPage.id = 'page-failure-report';
+    failureReportPage.innerHTML = `
+      <div class="page-header">
+        <div>
+          <div class="page-title">Signalement de la panne</div>
+          <div class="page-sub">Declaration terrain · Transmission maintenance · Suivi local</div>
+        </div>
+        <span class="tag risk"><span class="tag-dot"></span>Espace Technicien</span>
+      </div>
+      <div class="g-3-2">
+        <section class="card">
+          <div class="ch">
+            <span class="ct">Nouveau signalement</span>
+            <span class="ca">Champs obligatoires *</span>
+          </div>
+          <div class="cb">
+            <form id="failure-report-form">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label" for="failure-equipment">Equipement <span class="req">*</span></label>
+                  <input class="form-input" id="failure-equipment" name="equipment" required placeholder="Ex: Broyeur B-204">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="failure-location">Zone / Site <span class="req">*</span></label>
+                  <select class="form-select" id="failure-location" name="location" required>
+                    <option value="">Selectionner...</option>
+                    <option>Khouribga - Zone broyage</option>
+                    <option>Khouribga - Laverie</option>
+                    <option>Jorf Lasfar - Ligne P4</option>
+                    <option>Safi - Unite process</option>
+                    <option>Laayoune - Installation energie</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="failure-severity">Niveau d'urgence <span class="req">*</span></label>
+                  <select class="form-select" id="failure-severity" name="severity" required>
+                    <option value="">Selectionner...</option>
+                    <option>Critique</option>
+                    <option>Elevee</option>
+                    <option>Moderee</option>
+                    <option>Faible</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="failure-date">Date et heure <span class="req">*</span></label>
+                  <input class="form-input" id="failure-date" name="date" type="datetime-local" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="failure-downtime">Arret estime</label>
+                  <input class="form-input" id="failure-downtime" name="downtime" placeholder="Ex: 2 heures">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="failure-symptom">Symptome principal <span class="req">*</span></label>
+                  <select class="form-select" id="failure-symptom" name="symptom" required>
+                    <option value="">Selectionner...</option>
+                    <option>Arret complet</option>
+                    <option>Bruit anormal</option>
+                    <option>Vibration excessive</option>
+                    <option>Surchauffe</option>
+                    <option>Fuite</option>
+                    <option>Defaut electrique</option>
+                    <option>Autre</option>
+                  </select>
+                </div>
+                <div class="form-group full">
+                  <label class="form-label" for="failure-description">Description de la panne <span class="req">*</span></label>
+                  <textarea class="form-textarea" id="failure-description" name="description" required minlength="10" placeholder="Decrivez les signes observes, le contexte et les premieres actions effectuees."></textarea>
+                </div>
+                <div class="form-group full">
+                  <label class="auth-check">
+                    <input type="checkbox" name="isolated">
+                    <span>L'equipement a ete mis en securite et isole avant le signalement.</span>
+                  </label>
+                </div>
+              </div>
+              <div id="failure-report-notice" style="display:none;margin-top:14px;padding:10px 12px;border-radius:7px;background:rgba(0,132,61,.08);border:1px solid rgba(0,132,61,.2);color:var(--g);font-size:12px"></div>
+              <div style="display:flex;justify-content:flex-end;margin-top:16px">
+                <button class="btn-submit" type="submit">Transmettre le signalement</button>
+              </div>
+            </form>
+          </div>
+        </section>
+        <section class="card">
+          <div class="ch">
+            <span class="ct">Signalements recents</span>
+            <span class="ca">5 derniers</span>
+          </div>
+          <div class="cb" id="failure-report-history"></div>
+        </section>
+      </div>
+    `;
+    main.insertBefore(failureReportPage, footer);
+  }
+
   if (!root.querySelector('[data-page-id="tech-sheet"]')) {
     const techSheetNav = document.createElement('div');
     techSheetNav.className = 'nav-btn';
@@ -473,6 +949,20 @@ function ensureRoleSpecificPages(root) {
     `;
     navBottom.parentNode.insertBefore(checklistNav, navBottom);
   }
+
+  if (!root.querySelector('[data-page-id="failure-report"]')) {
+    const failureReportNav = document.createElement('div');
+    failureReportNav.className = 'nav-btn';
+    failureReportNav.setAttribute('data-page-id', 'failure-report');
+    failureReportNav.setAttribute('onclick', "showPage('failure-report',this)");
+    failureReportNav.innerHTML = `
+      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 3.6L2.4 17.3A2 2 0 004.1 20h15.8a2 2 0 001.7-2.7L13.7 3.6a2 2 0 00-3.4 0z"/></svg>
+      <span class="nav-tip">Signalement de la panne</span>
+    `;
+    navBottom.parentNode.insertBefore(failureReportNav, navBottom);
+  }
+
+  setupFailureReporting(root);
 }
 
 function applyRoleLabels(root, user) {
@@ -740,6 +1230,7 @@ export default function MinXView() {
 
     const syncUi = () => {
       ensureRoleSpecificPages(appRef.current);
+      setupNewsArticles(appRef.current);
       applyProjectTerminology(appRef.current);
       applyRoleLabels(appRef.current, user);
       applyRoleAccess(appRef.current, user);
